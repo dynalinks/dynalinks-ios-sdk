@@ -192,6 +192,7 @@ public struct LinkData {
     public let id: String                        // Link UUID
     public let name: String?                     // Link name
     public let path: String?                     // Path component
+    public let shortenedPath: String?            // Shortened path
     public let url: URL?                         // Original URL (with query params)
     public let fullURL: URL?                     // Full Dynalinks URL
     public let deepLinkValue: String?            // Deep link value for routing
@@ -238,9 +239,18 @@ The SDK collects the following device information for fingerprint matching:
 - iOS version
 - Timezone and language settings
 - Device model identifier
+- App version and build number
 - IDFV (Identifier for Vendor) - **No permission required**
 
 **Note:** IDFV is different from IDFA and does not require App Tracking Transparency permission.
+
+## SDK Version
+
+You can access the current SDK version programmatically:
+
+```swift
+print("Dynalinks SDK version: \(Dynalinks.version)")  // e.g., "1.0.0"
+```
 
 ## License
 

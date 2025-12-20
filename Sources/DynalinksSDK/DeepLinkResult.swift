@@ -74,6 +74,7 @@ public struct DeepLinkResult: Codable, Equatable {
         /// Number of clicks
         public let clicks: Int?
 
+        // swiftlint:disable:next nesting
         enum CodingKeys: String, CodingKey {
             case id
             case name
@@ -134,7 +135,10 @@ public struct DeepLinkResult: Codable, Equatable {
             path = try container.decodeIfPresent(String.self, forKey: .path)
             shortenedPath = try container.decodeIfPresent(String.self, forKey: .shortenedPath)
             deepLinkValue = try container.decodeIfPresent(String.self, forKey: .deepLinkValue)
-            iosDeferredDeepLinkingEnabled = try container.decodeIfPresent(Bool.self, forKey: .iosDeferredDeepLinkingEnabled)
+            iosDeferredDeepLinkingEnabled = try container.decodeIfPresent(
+                Bool.self,
+                forKey: .iosDeferredDeepLinkingEnabled
+            )
             enableForcedRedirect = try container.decodeIfPresent(Bool.self, forKey: .enableForcedRedirect)
             clicks = try container.decodeIfPresent(Int.self, forKey: .clicks)
 
@@ -148,7 +152,10 @@ public struct DeepLinkResult: Codable, Equatable {
             socialDescription = try container.decodeIfPresent(String.self, forKey: .socialDescription)
         }
 
-        private static func decodeURL(from container: KeyedDecodingContainer<CodingKeys>, forKey key: CodingKeys) -> URL? {
+        private static func decodeURL(
+            from container: KeyedDecodingContainer<CodingKeys>,
+            forKey key: CodingKeys
+        ) -> URL? {
             guard let urlString = try? container.decodeIfPresent(String.self, forKey: key),
                   let url = URL(string: urlString) else {
                 return nil

@@ -205,7 +205,8 @@ public final class Dynalinks {
         // Cache successful match
         if result.matched {
             storage.cachedResult = result
-            Logger.info("Match found: confidence=\(result.confidence?.rawValue ?? "unknown"), score=\(result.matchScore ?? 0)")
+            let confidence = result.confidence?.rawValue ?? "unknown"
+            Logger.info("Match found: confidence=\(confidence), score=\(result.matchScore ?? 0)")
         } else {
             Logger.info("No match found")
         }
