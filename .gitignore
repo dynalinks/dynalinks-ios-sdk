@@ -1,0 +1,25 @@
+# Xcode
+.DS_Store
+*.xcuserdata
+*.xcworkspace
+xcuserdata/
+build/
+DerivedData/
+*.xccheckout
+*.xcscmblueprint
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Packages/
+Package.resolved
+
+# CocoaPods (if used in Example app)
+Pods/
+Podfile.lock
+
+# Carthage (if applicable)
+Carthage/Build/
+
+# Code Injection (if applicable)
+iOSInjectionProject/
