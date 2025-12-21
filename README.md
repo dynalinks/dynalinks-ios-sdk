@@ -105,8 +105,6 @@ struct ContentView: View {
                 // Navigate to the deep link destination
                 handleDeepLink(link)
             }
-        } catch DynalinksError.alreadyChecked {
-            print("Already checked for this installation")
         } catch DynalinksError.simulator {
             print("Running on simulator - skipped")
         } catch {
@@ -214,8 +212,7 @@ public struct LinkData {
 ```swift
 public enum DynalinksError: Error {
     case notConfigured              // SDK not configured
-    case invalidAPIKey(String)      // API key is empty
-    case alreadyChecked             // Already checked for this installation
+    case invalidAPIKey(String)      // API key is empty or invalid
     case simulator                  // Running on simulator (disabled by default)
     case networkError(underlying:)  // Network request failed
     case invalidResponse            // Server returned invalid response
@@ -250,6 +247,14 @@ You can access the current SDK version programmatically:
 
 ```swift
 print("Dynalinks SDK version: \(Dynalinks.version)")  // e.g., "1.0.0"
+```
+
+## Running Tests
+
+Tests must be run with xcodebuild (not `swift test`):
+
+```bash
+xcodebuild test -scheme DynalinksSDK -destination 'platform=iOS Simulator,name=iPhone SE (3rd generation)'
 ```
 
 ## License

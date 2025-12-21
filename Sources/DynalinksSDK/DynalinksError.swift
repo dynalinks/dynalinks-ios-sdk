@@ -13,9 +13,6 @@ public enum DynalinksError: Error, LocalizedError, Equatable {
 
     // MARK: - Runtime Errors
 
-    /// Deferred deep link check has already been performed for this installation.
-    case alreadyChecked
-
     /// Deferred deep linking is not available on simulator.
     case simulator
 
@@ -43,8 +40,6 @@ public enum DynalinksError: Error, LocalizedError, Equatable {
             return "Dynalinks SDK not configured. Call Dynalinks.configure() first."
         case .invalidAPIKey(let message):
             return "Invalid API key: \(message)"
-        case .alreadyChecked:
-            return "Deferred deep link already checked for this installation."
         case .simulator:
             return "Deferred deep linking not available on simulator."
         case .networkError(let underlying):
@@ -69,7 +64,6 @@ public enum DynalinksError: Error, LocalizedError, Equatable {
     public static func == (lhs: DynalinksError, rhs: DynalinksError) -> Bool {
         switch (lhs, rhs) {
         case (.notConfigured, .notConfigured),
-             (.alreadyChecked, .alreadyChecked),
              (.simulator, .simulator),
              (.networkError, .networkError),
              (.invalidResponse, .invalidResponse),

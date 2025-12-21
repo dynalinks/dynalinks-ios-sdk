@@ -184,14 +184,15 @@ public final class Dynalinks: @unchecked Sendable {
     // MARK: - Private Implementation
 
     private func performCheck() async throws -> DeepLinkResult {
-        // Return cached result if already checked
+        // Return cached result or no-match if already checked
         if storage.hasCheckedForDeferredDeepLink {
             Logger.debug("Already checked for deferred deep link")
             if let cached = storage.cachedResult {
                 Logger.info("Returning cached result")
                 return cached
             }
-            throw DynalinksError.alreadyChecked
+            Logger.info("Previously checked, no match found")
+            return DeepLinkResult(matched: false, confidence: nil, matchScore: nil, link: nil)
         }
 
         // Skip on simulator unless explicitly allowed

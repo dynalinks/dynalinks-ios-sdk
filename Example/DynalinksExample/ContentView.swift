@@ -191,9 +191,6 @@ struct ContentView: View {
         case .invalidAPIKey(let message):
             status = "Invalid API key"
             self.error = message
-        case .alreadyChecked:
-            status = "Already checked"
-            self.error = "Use 'Reset SDK State' to check again"
         case .simulator:
             status = "Simulator not allowed"
             self.error = "Enable allowSimulator in configuration"

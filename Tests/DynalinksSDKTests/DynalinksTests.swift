@@ -57,7 +57,7 @@ final class DynalinksTests: XCTestCase {
 
     // MARK: - Already Checked Tests
 
-    func testCheckForDeferredDeepLink_ThrowsAlreadyChecked_OnSecondCall() async throws {
+    func testCheckForDeferredDeepLink_ReturnsNoMatch_OnSecondCall() async throws {
         MockURLProtocol.mockSuccess(json: "{\"matched\": false}")
 
         let apiClient = APIClient(
@@ -70,15 +70,12 @@ final class DynalinksTests: XCTestCase {
         Dynalinks.setShared(sdk)
 
         // First call succeeds
-        _ = try await Dynalinks.checkForDeferredDeepLink()
+        let result1 = try await Dynalinks.checkForDeferredDeepLink()
+        XCTAssertFalse(result1.matched)
 
-        // Second call throws alreadyChecked
-        do {
-            _ = try await Dynalinks.checkForDeferredDeepLink()
-            XCTFail("Expected alreadyChecked error")
-        } catch let error as DynalinksError {
-            XCTAssertEqual(error, .alreadyChecked)
-        }
+        // Second call returns no match (doesn't throw)
+        let result2 = try await Dynalinks.checkForDeferredDeepLink()
+        XCTAssertFalse(result2.matched)
     }
 
     func testCheckForDeferredDeepLink_ReturnsCachedResult_WhenMatchedPreviously() async throws {
@@ -135,7 +132,7 @@ final class DynalinksTests: XCTestCase {
         // Reset
         Dynalinks.reset()
 
-        // Should not throw alreadyChecked
+        // Should make a fresh API call after reset
         let result = try await Dynalinks.checkForDeferredDeepLink()
         XCTAssertFalse(result.matched)
     }
