@@ -38,7 +38,7 @@ import DynalinksSDK
 struct MyApp: App {
     init() {
         do {
-            try Dynalinks.configure(clientAPIKey: "your-client-api-key-uuid")
+            try Dynalinks.configure(clientAPIKey: "your-client-api-key")
         } catch {
             print("Failed to configure Dynalinks: \(error)")
         }
@@ -64,7 +64,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
         do {
-            try Dynalinks.configure(clientAPIKey: "your-client-api-key-uuid")
+            try Dynalinks.configure(clientAPIKey: "your-client-api-key")
         } catch {
             print("Failed to configure Dynalinks: \(error)")
         }
@@ -143,7 +143,7 @@ Dynalinks.checkForDeferredDeepLink { result in
 ```swift
 try Dynalinks.configure(
     // Required: Your client API key from the Dynalinks console
-    clientAPIKey: "550e8400-e29b-41d4-a716-446655440000",
+    clientAPIKey: "your-client-api-key",
 
     // Custom API URL (optional, defaults to production)
     baseURL: URL(string: "https://dynalinks.app/api/v1")!,
@@ -237,7 +237,7 @@ When testing against a local development server, use `lvh.me` instead of `localh
 
 ```swift
 try Dynalinks.configure(
-    clientAPIKey: "your-api-key-uuid",
+    clientAPIKey: "your-client-api-key",
     baseURL: URL(string: "http://lvh.me:3000/api/v1")!,
     logLevel: .debug,
     allowSimulator: true

@@ -38,11 +38,13 @@ Edit `DynalinksExampleApp.swift` to configure your settings:
 ```swift
 Dynalinks.configure(
     clientAPIKey: "your-client-api-key-here",  // From Dynalinks console
-    baseURL: URL(string: "http://localhost:3000")!,  // Your server URL
+    baseURL: URL(string: "http://lvh.me:3000/api/v1")!,  // Your local server URL
     logLevel: .debug,
     allowSimulator: true  // For testing
 )
 ```
+
+> **Note:** Use `lvh.me` instead of `localhost` for local development. It resolves to 127.0.0.1 and is required by the server.
 
 ## Testing
 
