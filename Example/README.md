@@ -33,30 +33,17 @@ open DynalinksExample.xcodeproj
 
 ## Configuration
 
-Edit `DynalinksExampleApp.swift` to configure your settings:
-
-```swift
-Dynalinks.configure(
-    clientAPIKey: "your-client-api-key-here",  // From Dynalinks console
-    baseURL: URL(string: "http://lvh.me:3000/api/v1")!,  // Your local server URL
-    logLevel: .debug,
-    allowSimulator: true  // For testing
-)
-```
-
-> **Note:** Use `lvh.me` instead of `localhost` for local development. It resolves to 127.0.0.1 and is required by the server.
+Set your Client API Key via environment variable in Xcode:
+1. Edit Scheme → Run → Arguments → Environment Variables
+2. Add `DYNALINKS_API_KEY` with your key from the Dynalinks console
 
 ## Testing
 
-1. Start your Dynalinks server locally:
-   ```bash
-   cd /path/to/dynalinks
-   bin/rails server
-   ```
+1. Create a test link in the Dynalinks console with deferred deep linking enabled
 
-2. Create a test link in the console
+2. Visit the link preview page in Safari on the simulator
 
-3. Visit the link preview page in Safari on the simulator
+3. Tap the App Store button (this records the fingerprint)
 
 4. Open the example app and tap "Check for Deferred Deep Link"
 

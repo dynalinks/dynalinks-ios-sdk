@@ -6,11 +6,16 @@ struct DynalinksExampleApp: App {
     init() {
         // Configure SDK with your client API key
         // Get this from your Dynalinks console (must be a valid UUID)
+        //
+        // To override, set DYNALINKS_API_KEY environment variable in Xcode:
+        // Edit Scheme → Run → Arguments → Environment Variables
+        let apiKey = ProcessInfo.processInfo.environment["DYNALINKS_API_KEY"] ?? "00000000-0000-0000-0000-000000000000"
+        let baseURLString = ProcessInfo.processInfo.environment["DYNALINKS_BASE_URL"] ?? "https://dynalinks.app/api/v1"
+
         do {
             try Dynalinks.configure(
-                clientAPIKey: "5020d84b-957c-4153-b4ed-62037cbad667",  // Replace with your actual API key
-                // Local development server
-                baseURL: URL(string: "http://lvh.me:3000/api/v1")!,
+                clientAPIKey: apiKey,
+                baseURL: URL(string: baseURLString)!,
                 logLevel: .debug,
                 allowSimulator: true  // Enable for testing on simulator
             )
