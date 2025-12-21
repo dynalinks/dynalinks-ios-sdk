@@ -6,9 +6,30 @@ final class APIClient {
     private let clientAPIKey: String
     private let session: URLSession
 
-    init(baseURL: URL, clientAPIKey: String, session: URLSession? = nil) {
+    /// Maximum number of retry attempts for transient failures (0 = no retries)
+    private let maxRetries: Int
+
+    /// Base delay between retries (exponential backoff: 1s, 2s, 4s)
+    private let baseRetryDelay: TimeInterval
+
+    /// Creates an API client
+    /// - Parameters:
+    ///   - baseURL: API base URL
+    ///   - clientAPIKey: Client API key for authentication
+    ///   - session: URLSession to use (optional, for testing)
+    ///   - maxRetries: Maximum retry attempts (default: 3, set to 0 for no retries)
+    ///   - baseRetryDelay: Base delay between retries in seconds (default: 1.0)
+    init(
+        baseURL: URL,
+        clientAPIKey: String,
+        session: URLSession? = nil,
+        maxRetries: Int = 3,
+        baseRetryDelay: TimeInterval = 1.0
+    ) {
         self.baseURL = baseURL
         self.clientAPIKey = clientAPIKey
+        self.maxRetries = maxRetries
+        self.baseRetryDelay = baseRetryDelay
 
         if let session = session {
             self.session = session
@@ -16,6 +37,8 @@ final class APIClient {
             let config = URLSessionConfiguration.default
             config.timeoutIntervalForRequest = 10
             config.timeoutIntervalForResource = 30
+            // Wait for connectivity instead of failing immediately
+            config.waitsForConnectivity = true
             self.session = URLSession(configuration: config)
         }
     }
@@ -41,26 +64,78 @@ final class APIClient {
 
         Logger.debug("Sending match request to \(url)")
 
-        let data: Data
-        let response: URLResponse
+        return try await performRequestWithRetry(request)
+    }
 
-        do {
-            (data, response) = try await session.data(for: request)
-        } catch {
-            Logger.error("Network request failed: \(error)")
-            throw DynalinksError.networkError(underlying: error)
+    /// Performs HTTP request with exponential backoff retry for transient failures
+    private func performRequestWithRetry(_ request: URLRequest) async throws -> DeepLinkResult {
+        var lastError: Error?
+
+        for attempt in 0...maxRetries {
+            do {
+                let (data, response) = try await session.data(for: request)
+
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    Logger.error("Invalid response type")
+                    throw DynalinksError.invalidResponse
+                }
+
+                Logger.debug("Response status: \(httpResponse.statusCode) (attempt \(attempt + 1))")
+
+                switch httpResponse.statusCode {
+                case 200...299:
+                    return try decodeResponse(data)
+
+                // Client errors - don't retry
+                case 400...499:
+                    return try handleClientError(httpResponse.statusCode, data: data)
+
+                // Server errors - retry with backoff
+                case 500...599:
+                    let message = try? decodeErrorMessage(data)
+                    let error = DynalinksError.serverError(statusCode: httpResponse.statusCode, message: message)
+                    lastError = error
+
+                    if attempt < maxRetries {
+                        let delay = baseRetryDelay * pow(2.0, Double(attempt))
+                        Logger.warning("Server error \(httpResponse.statusCode), retrying in \(delay)s (attempt \(attempt + 1)/\(maxRetries + 1))")
+                        try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                        continue
+                    }
+
+                    Logger.error("Server error after \(maxRetries + 1) attempts: \(httpResponse.statusCode)")
+                    throw error
+
+                default:
+                    let message = try? decodeErrorMessage(data)
+                    throw DynalinksError.serverError(statusCode: httpResponse.statusCode, message: message)
+                }
+            } catch let error as DynalinksError {
+                // Rethrow DynalinksError directly (no retry for client errors)
+                throw error
+            } catch {
+                // Network errors - retry with backoff
+                lastError = error
+
+                if attempt < maxRetries {
+                    let delay = baseRetryDelay * pow(2.0, Double(attempt))
+                    Logger.warning("Network error, retrying in \(delay)s (attempt \(attempt + 1)/\(maxRetries + 1)): \(error.localizedDescription)")
+                    try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                    continue
+                }
+
+                Logger.error("Network request failed after \(maxRetries + 1) attempts: \(error)")
+                throw DynalinksError.networkError(underlying: error)
+            }
         }
 
-        guard let httpResponse = response as? HTTPURLResponse else {
-            Logger.error("Invalid response type")
-            throw DynalinksError.invalidResponse
-        }
+        // Should not reach here, but handle just in case
+        throw lastError ?? DynalinksError.networkError(underlying: NSError(domain: "DynalinksSDK", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unknown error"]))
+    }
 
-        Logger.debug("Response status: \(httpResponse.statusCode)")
-
-        switch httpResponse.statusCode {
-        case 200...299:
-            return try decodeResponse(data)
+    /// Handle 4xx client errors (no retry)
+    private func handleClientError(_ statusCode: Int, data: Data) throws -> DeepLinkResult {
+        switch statusCode {
         case 401:
             Logger.error("Unauthorized - check client API key")
             throw DynalinksError.serverError(statusCode: 401, message: "Invalid client API key")
@@ -69,8 +144,8 @@ final class APIClient {
             throw DynalinksError.serverError(statusCode: 429, message: "Rate limit exceeded")
         default:
             let message = try? decodeErrorMessage(data)
-            Logger.error("Server error: \(httpResponse.statusCode) - \(message ?? "unknown")")
-            throw DynalinksError.serverError(statusCode: httpResponse.statusCode, message: message)
+            Logger.error("Client error: \(statusCode) - \(message ?? "unknown")")
+            throw DynalinksError.serverError(statusCode: statusCode, message: message)
         }
     }
 

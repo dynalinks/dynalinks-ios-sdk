@@ -28,7 +28,7 @@ import Foundation
 ///     }
 /// }
 /// ```
-public final class Dynalinks {
+public final class Dynalinks: @unchecked Sendable {
     // MARK: - Version
 
     /// The current version of the Dynalinks SDK
@@ -36,6 +36,8 @@ public final class Dynalinks {
 
     // MARK: - Singleton
 
+    /// Lock for thread-safe singleton initialization
+    private static let configurationLock = NSLock()
     private static var shared: Dynalinks?
 
     // MARK: - Properties
@@ -94,16 +96,20 @@ public final class Dynalinks {
         }(),
         allowSimulator: Bool = false
     ) throws {
+        // Validate API key before acquiring lock
+        guard !clientAPIKey.isEmpty else {
+            Logger.error("Invalid API key: empty string")
+            throw DynalinksError.invalidAPIKey("Client API key cannot be empty")
+        }
+
+        // Thread-safe singleton initialization
+        configurationLock.lock()
+        defer { configurationLock.unlock() }
+
         // Skip if already configured (prevents double initialization in SwiftUI)
         if shared != nil {
             Logger.debug("SDK already configured, skipping")
             return
-        }
-
-        // Validate API key is not empty
-        guard !clientAPIKey.isEmpty else {
-            Logger.error("Invalid API key: empty string")
-            throw DynalinksError.invalidAPIKey("Client API key cannot be empty")
         }
 
         shared = Dynalinks(

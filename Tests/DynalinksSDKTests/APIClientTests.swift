@@ -10,7 +10,8 @@ final class APIClientTests: XCTestCase {
         apiClient = APIClient(
             baseURL: URL(string: "https://test.dynalinks.app/api/v1")!,
             clientAPIKey: "test-api-key",
-            session: session
+            session: session,
+            maxRetries: 0  // Disable retries for faster tests
         )
     }
 

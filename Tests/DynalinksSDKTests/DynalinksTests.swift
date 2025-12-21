@@ -45,7 +45,8 @@ final class DynalinksTests: XCTestCase {
         let apiClient = APIClient(
             baseURL: URL(string: "https://test.dynalinks.app/api/v1")!,
             clientAPIKey: "test-key",
-            session: mockSession
+            session: mockSession,
+            maxRetries: 0
         )
         let sdk = Dynalinks(apiClient: apiClient, storage: mockStorage, allowSimulator: true)
         Dynalinks.setShared(sdk)
@@ -62,7 +63,8 @@ final class DynalinksTests: XCTestCase {
         let apiClient = APIClient(
             baseURL: URL(string: "https://test.dynalinks.app/api/v1")!,
             clientAPIKey: "test-key",
-            session: mockSession
+            session: mockSession,
+            maxRetries: 0
         )
         let sdk = Dynalinks(apiClient: apiClient, storage: mockStorage, allowSimulator: true)
         Dynalinks.setShared(sdk)
@@ -93,7 +95,8 @@ final class DynalinksTests: XCTestCase {
         let apiClient = APIClient(
             baseURL: URL(string: "https://test.dynalinks.app/api/v1")!,
             clientAPIKey: "test-key",
-            session: mockSession
+            session: mockSession,
+            maxRetries: 0
         )
         let sdk = Dynalinks(apiClient: apiClient, storage: mockStorage, allowSimulator: true)
         Dynalinks.setShared(sdk)
@@ -120,7 +123,8 @@ final class DynalinksTests: XCTestCase {
         let apiClient = APIClient(
             baseURL: URL(string: "https://test.dynalinks.app/api/v1")!,
             clientAPIKey: "test-key",
-            session: mockSession
+            session: mockSession,
+            maxRetries: 0
         )
         let sdk = Dynalinks(apiClient: apiClient, storage: mockStorage, allowSimulator: true)
         Dynalinks.setShared(sdk)
@@ -150,7 +154,8 @@ final class DynalinksTests: XCTestCase {
         let apiClient = APIClient(
             baseURL: URL(string: "https://test.dynalinks.app/api/v1")!,
             clientAPIKey: "test-key",
-            session: mockSession
+            session: mockSession,
+            maxRetries: 0
         )
         let sdk = Dynalinks(apiClient: apiClient, storage: mockStorage, allowSimulator: true)
         Dynalinks.setShared(sdk)
@@ -182,7 +187,8 @@ final class DynalinksTests: XCTestCase {
         let apiClient = APIClient(
             baseURL: URL(string: "https://test.dynalinks.app/api/v1")!,
             clientAPIKey: "test-key",
-            session: mockSession
+            session: mockSession,
+            maxRetries: 0
         )
         let sdk = Dynalinks(apiClient: apiClient, storage: mockStorage, allowSimulator: true)
         Dynalinks.setShared(sdk)
@@ -207,7 +213,8 @@ final class DynalinksTests: XCTestCase {
         let apiClient = APIClient(
             baseURL: URL(string: "https://test.dynalinks.app/api/v1")!,
             clientAPIKey: "wrong-key",
-            session: mockSession
+            session: mockSession,
+            maxRetries: 0
         )
         let sdk = Dynalinks(apiClient: apiClient, storage: mockStorage, allowSimulator: true)
         Dynalinks.setShared(sdk)
@@ -232,7 +239,8 @@ final class DynalinksTests: XCTestCase {
         let apiClient = APIClient(
             baseURL: URL(string: "https://test.dynalinks.app/api/v1")!,
             clientAPIKey: "test-key",
-            session: mockSession
+            session: mockSession,
+            maxRetries: 0
         )
         let sdk = Dynalinks(apiClient: apiClient, storage: mockStorage, allowSimulator: true)
         Dynalinks.setShared(sdk)
@@ -269,7 +277,8 @@ final class DynalinksTests: XCTestCase {
         let apiClient = APIClient(
             baseURL: URL(string: "https://test.dynalinks.app/api/v1")!,
             clientAPIKey: "test-key",
-            session: mockSession
+            session: mockSession,
+            maxRetries: 0
         )
         let sdk = Dynalinks(apiClient: apiClient, storage: mockStorage, allowSimulator: true)
         Dynalinks.setShared(sdk)
@@ -296,7 +305,8 @@ final class DynalinksTests: XCTestCase {
         let apiClient = APIClient(
             baseURL: URL(string: "https://test.dynalinks.app/api/v1")!,
             clientAPIKey: "test-key",
-            session: mockSession
+            session: mockSession,
+            maxRetries: 0
         )
         let sdk = Dynalinks(apiClient: apiClient, storage: mockStorage, allowSimulator: true)
         Dynalinks.setShared(sdk)
@@ -338,7 +348,8 @@ final class DynalinksTests: XCTestCase {
         let apiClient = APIClient(
             baseURL: URL(string: "https://test.dynalinks.app/api/v1")!,
             clientAPIKey: "valid-api-key",
-            session: mockSession
+            session: mockSession,
+            maxRetries: 0
         )
         let sdk = Dynalinks(apiClient: apiClient, storage: mockStorage, allowSimulator: true)
         Dynalinks.setShared(sdk)
@@ -365,7 +376,8 @@ final class DynalinksTests: XCTestCase {
         let apiClient = APIClient(
             baseURL: URL(string: "https://test.dynalinks.app/api/v1")!,
             clientAPIKey: "valid-api-key",
-            session: mockSession
+            session: mockSession,
+            maxRetries: 0
         )
         let sdk = Dynalinks(apiClient: apiClient, storage: mockStorage, allowSimulator: true)
         Dynalinks.setShared(sdk)
@@ -386,7 +398,8 @@ final class DynalinksTests: XCTestCase {
         let apiClient = APIClient(
             baseURL: URL(string: "https://test.dynalinks.app/api/v1")!,
             clientAPIKey: "test-key",
-            session: mockSession
+            session: mockSession,
+            maxRetries: 0
         )
         let sdk = Dynalinks(apiClient: apiClient, storage: mockStorage, allowSimulator: true)
         Dynalinks.setShared(sdk)
