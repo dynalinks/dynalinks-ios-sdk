@@ -16,7 +16,7 @@ Add the following to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/dynalinks/ios-sdk", from: "1.0.0")
+    .package(url: "https://github.com/dynalinks/dynalinks-ios-sdk", from: "1.0.0")
 ]
 ```
 
@@ -230,21 +230,6 @@ public enum DynalinksError: Error {
 2. **Handle gracefully**: The SDK caches results - subsequent calls return cached data
 3. **Don't block UI**: Use async/await or completion handlers
 4. **Test on device**: Deferred deep linking is disabled on simulator by default
-
-## Local Development
-
-When testing against a local development server, use `lvh.me` instead of `localhost`:
-
-```swift
-try Dynalinks.configure(
-    clientAPIKey: "your-client-api-key",
-    baseURL: URL(string: "http://lvh.me:3000/api/v1")!,
-    logLevel: .debug,
-    allowSimulator: true
-)
-```
-
-`lvh.me` is a domain that resolves to `127.0.0.1` and is required for local development.
 
 ## Privacy
 
