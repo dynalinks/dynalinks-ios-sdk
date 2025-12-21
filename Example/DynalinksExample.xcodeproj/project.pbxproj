@@ -15,6 +15,7 @@
 /* Begin PBXFileReference section */
 		62CB9F4D6FE73A57D80358AC /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7379A8F7063C0C89F2A24C5F /* DynalinksExample.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DynalinksExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1B2C3D4E5F60718091A2B3C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FA2436E900A1A600510D5B03 /* DynalinksExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynalinksExampleApp.swift; sourceTree = "<group>"; };
 		FD5A32DE94CE7012F6AAFDD6 /* DynalinksSDK */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DynalinksSDK; path = ..; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -52,6 +53,7 @@
 			children = (
 				62CB9F4D6FE73A57D80358AC /* ContentView.swift */,
 				FA2436E900A1A600510D5B03 /* DynalinksExampleApp.swift */,
+				A1B2C3D4E5F60718091A2B3C /* Info.plist */,
 			);
 			path = DynalinksExample;
 			sourceTree = "<group>";
@@ -194,6 +196,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DynalinksExample/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -216,6 +219,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DynalinksExample/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

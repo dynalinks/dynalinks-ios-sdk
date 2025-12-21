@@ -185,27 +185,30 @@ struct ContentView: View {
 
     private func handleError(_ error: DynalinksError) {
         switch error {
+        case .notConfigured:
+            status = "SDK not configured"
+            self.error = "Call Dynalinks.configure() first"
+        case .invalidAPIKey(let message):
+            status = "Invalid API key"
+            self.error = message
         case .alreadyChecked:
             status = "Already checked"
             self.error = "Use 'Reset SDK State' to check again"
         case .simulator:
             status = "Simulator not allowed"
             self.error = "Enable allowSimulator in configuration"
-        case .noMatch:
-            status = "No match found"
-            self.error = nil
-        case .notConfigured:
-            status = "SDK not configured"
-            self.error = "Call Dynalinks.configure() first"
         case .networkError(let underlying):
             status = "Network error"
             self.error = underlying?.localizedDescription ?? "Check your connection"
-        case .serverError(let code, let message):
-            status = "Server error (\(code))"
-            self.error = message
         case .invalidResponse:
             status = "Invalid response"
             self.error = "Server returned unexpected data"
+        case .serverError(let code, let message):
+            status = "Server error (\(code))"
+            self.error = message
+        case .noMatch:
+            status = "No match found"
+            self.error = nil
         }
     }
 

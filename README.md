@@ -29,7 +29,7 @@ Or in Xcode:
 
 ### 1. Configure the SDK
 
-Configure the SDK as early as possible in your app's lifecycle. The client API key must be a valid UUID.
+Configure the SDK as early as possible in your app's lifecycle.
 
 ```swift
 import DynalinksSDK
@@ -142,7 +142,7 @@ Dynalinks.checkForDeferredDeepLink { result in
 
 ```swift
 try Dynalinks.configure(
-    // Required: Your client API key (must be a valid UUID)
+    // Required: Your client API key from the Dynalinks console
     clientAPIKey: "550e8400-e29b-41d4-a716-446655440000",
 
     // Custom API URL (optional, defaults to production)
@@ -214,7 +214,7 @@ public struct LinkData {
 ```swift
 public enum DynalinksError: Error {
     case notConfigured              // SDK not configured
-    case invalidAPIKey(String)      // API key is not a valid UUID
+    case invalidAPIKey(String)      // API key is empty
     case alreadyChecked             // Already checked for this installation
     case simulator                  // Running on simulator (disabled by default)
     case networkError(underlying:)  // Network request failed
@@ -230,6 +230,21 @@ public enum DynalinksError: Error {
 2. **Handle gracefully**: The SDK caches results - subsequent calls return cached data
 3. **Don't block UI**: Use async/await or completion handlers
 4. **Test on device**: Deferred deep linking is disabled on simulator by default
+
+## Local Development
+
+When testing against a local development server, use `lvh.me` instead of `localhost`:
+
+```swift
+try Dynalinks.configure(
+    clientAPIKey: "your-api-key-uuid",
+    baseURL: URL(string: "http://lvh.me:3000/api/v1")!,
+    logLevel: .debug,
+    allowSimulator: true
+)
+```
+
+`lvh.me` is a domain that resolves to `127.0.0.1` and is required for local development.
 
 ## Privacy
 

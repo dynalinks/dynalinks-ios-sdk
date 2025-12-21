@@ -77,11 +77,11 @@ public final class Dynalinks {
     /// typically in `application(_:didFinishLaunchingWithOptions:)` or your App's `init`.
     ///
     /// - Parameters:
-    ///   - clientAPIKey: Your project's client API key from the Dynalinks console (must be a valid UUID)
+    ///   - clientAPIKey: Your project's client API key from the Dynalinks console
     ///   - baseURL: API base URL (defaults to production)
     ///   - logLevel: Logging verbosity (defaults to `.error` for release, `.debug` for development)
     ///   - allowSimulator: Allow deferred deep link checks on simulator (defaults to `false`)
-    /// - Throws: `DynalinksError.invalidAPIKey` if the API key is not a valid UUID
+    /// - Throws: `DynalinksError.invalidAPIKey` if the API key is empty
     public static func configure(
         clientAPIKey: String,
         baseURL: URL = URL(string: "https://dynalinks.app/api/v1")!,
@@ -94,10 +94,16 @@ public final class Dynalinks {
         }(),
         allowSimulator: Bool = false
     ) throws {
-        // Validate API key format
-        guard UUID(uuidString: clientAPIKey) != nil else {
-            Logger.error("Invalid API key format: \(clientAPIKey)")
-            throw DynalinksError.invalidAPIKey("Client API key must be a valid UUID")
+        // Skip if already configured (prevents double initialization in SwiftUI)
+        if shared != nil {
+            Logger.debug("SDK already configured, skipping")
+            return
+        }
+
+        // Validate API key is not empty
+        guard !clientAPIKey.isEmpty else {
+            Logger.error("Invalid API key: empty string")
+            throw DynalinksError.invalidAPIKey("Client API key cannot be empty")
         }
 
         shared = Dynalinks(

@@ -8,9 +8,9 @@ struct DynalinksExampleApp: App {
         // Get this from your Dynalinks console (must be a valid UUID)
         do {
             try Dynalinks.configure(
-                clientAPIKey: "00000000-0000-0000-0000-000000000000",  // Replace with your actual API key
-                // Use your local development server for testing
-                baseURL: URL(string: "http://localhost:3000/api/v1")!,
+                clientAPIKey: "5020d84b-957c-4153-b4ed-62037cbad667",  // Replace with your actual API key
+                // Local development server
+                baseURL: URL(string: "http://lvh.me:3000/api/v1")!,
                 logLevel: .debug,
                 allowSimulator: true  // Enable for testing on simulator
             )
