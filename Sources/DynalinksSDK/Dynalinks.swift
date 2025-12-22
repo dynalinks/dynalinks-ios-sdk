@@ -57,7 +57,7 @@ public final class Dynalinks: @unchecked Sendable {
         self.apiClient = APIClient(baseURL: baseURL, clientAPIKey: clientAPIKey)
         self.storage = Storage()
         self.allowSimulator = allowSimulator
-        Logger.logLevel = logLevel
+        DynalinksLogger.logLevel = logLevel
     }
 
     /// Internal initializer for testing with dependency injection
@@ -98,7 +98,7 @@ public final class Dynalinks: @unchecked Sendable {
     ) throws {
         // Validate API key before acquiring lock
         guard !clientAPIKey.isEmpty else {
-            Logger.error("Invalid API key: empty string")
+            DynalinksLogger.error("Invalid API key: empty string")
             throw DynalinksError.invalidAPIKey("Client API key cannot be empty")
         }
 
@@ -108,7 +108,7 @@ public final class Dynalinks: @unchecked Sendable {
 
         // Skip if already configured (prevents double initialization in SwiftUI)
         if shared != nil {
-            Logger.debug("SDK already configured, skipping")
+            DynalinksLogger.debug("SDK already configured, skipping")
             return
         }
 
@@ -118,7 +118,7 @@ public final class Dynalinks: @unchecked Sendable {
             logLevel: logLevel,
             allowSimulator: allowSimulator
         )
-        Logger.info("Dynalinks SDK configured")
+        DynalinksLogger.info("Dynalinks SDK configured")
     }
 
     // MARK: - Public API
@@ -137,7 +137,7 @@ public final class Dynalinks: @unchecked Sendable {
     /// - Throws: `DynalinksError` if the check fails or no match is found
     public static func checkForDeferredDeepLink() async throws -> DeepLinkResult {
         guard let sdk = shared else {
-            Logger.error("SDK not configured")
+            DynalinksLogger.error("SDK not configured")
             throw DynalinksError.notConfigured
         }
         return try await sdk.performCheck()
@@ -190,7 +190,7 @@ public final class Dynalinks: @unchecked Sendable {
     /// - Throws: `DynalinksError` if the SDK is not configured or the request fails
     public static func handleUniversalLink(url: URL) async throws -> DeepLinkResult {
         guard let sdk = shared else {
-            Logger.error("SDK not configured")
+            DynalinksLogger.error("SDK not configured")
             throw DynalinksError.notConfigured
         }
         return try await sdk.resolveUniversalLink(url: url)
@@ -229,7 +229,7 @@ public final class Dynalinks: @unchecked Sendable {
     /// - Warning: Do not use in production. This is intended for testing only.
     public static func reset() {
         shared?.storage.reset()
-        Logger.info("SDK state reset")
+        DynalinksLogger.info("SDK state reset")
     }
 
     /// Internal method to set the shared instance for testing
@@ -242,28 +242,28 @@ public final class Dynalinks: @unchecked Sendable {
     private func performCheck() async throws -> DeepLinkResult {
         // Return cached result or no-match if already checked
         if storage.hasCheckedForDeferredDeepLink {
-            Logger.debug("Already checked for deferred deep link")
+            DynalinksLogger.debug("Already checked for deferred deep link")
             if let cached = storage.cachedResult {
-                Logger.info("Returning cached result")
+                DynalinksLogger.info("Returning cached result")
                 return cached
             }
-            Logger.info("Previously checked, no match found")
+            DynalinksLogger.info("Previously checked, no match found")
             return DeepLinkResult(matched: false, confidence: nil, matchScore: nil, link: nil)
         }
 
         // Skip on simulator unless explicitly allowed
         #if targetEnvironment(simulator)
         if !allowSimulator {
-            Logger.info("Skipping deferred deep link check on simulator")
+            DynalinksLogger.info("Skipping deferred deep link check on simulator")
             storage.hasCheckedForDeferredDeepLink = true
             throw DynalinksError.simulator
         }
-        Logger.warning("Running on simulator with allowSimulator=true")
+        DynalinksLogger.warning("Running on simulator with allowSimulator=true")
         #endif
 
         // Collect fingerprint
         let fingerprint = DeviceFingerprint.collect()
-        Logger.debug("Collected fingerprint: \(fingerprint.deviceModel), \(fingerprint.osVersion)")
+        DynalinksLogger.debug("Collected fingerprint: \(fingerprint.deviceModel), \(fingerprint.osVersion)")
 
         // Make API request
         let result = try await apiClient.matchFingerprint(fingerprint)
@@ -275,16 +275,16 @@ public final class Dynalinks: @unchecked Sendable {
         if result.matched {
             storage.cachedResult = result
             let confidence = result.confidence?.rawValue ?? "unknown"
-            Logger.info("Match found: confidence=\(confidence), score=\(result.matchScore ?? 0)")
+            DynalinksLogger.info("Match found: confidence=\(confidence), score=\(result.matchScore ?? 0)")
         } else {
-            Logger.info("No match found")
+            DynalinksLogger.info("No match found")
         }
 
         return result
     }
 
     private func resolveUniversalLink(url: URL) async throws -> DeepLinkResult {
-        Logger.debug("Resolving Universal Link: \(url)")
+        DynalinksLogger.debug("Resolving Universal Link: \(url)")
 
         // Mark as checked to skip deferred deep link check
         storage.hasCheckedForDeferredDeepLink = true
@@ -295,9 +295,9 @@ public final class Dynalinks: @unchecked Sendable {
         // Cache successful match
         if result.matched {
             storage.cachedResult = result
-            Logger.info("Universal Link resolved: \(result.link?.path ?? "unknown")")
+            DynalinksLogger.info("Universal Link resolved: \(result.link?.path ?? "unknown")")
         } else {
-            Logger.info("Universal Link not matched")
+            DynalinksLogger.info("Universal Link not matched")
         }
 
         return result

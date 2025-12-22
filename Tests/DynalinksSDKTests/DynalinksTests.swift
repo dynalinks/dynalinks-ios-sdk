@@ -14,7 +14,7 @@ final class DynalinksTests: XCTestCase {
 
         // Reset shared instance
         Dynalinks.setShared(nil)
-        Logger.logLevel = .none // Suppress logs during tests
+        DynalinksLogger.logLevel = .none // Suppress logs during tests
     }
 
     override func tearDown() {

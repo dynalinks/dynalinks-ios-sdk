@@ -6,7 +6,7 @@ final class ConfigurationTests: XCTestCase {
     override func setUp() {
         super.setUp()
         Dynalinks.setShared(nil)
-        Logger.logLevel = .none
+        DynalinksLogger.logLevel = .none
     }
 
     override func tearDown() {

@@ -23,7 +23,7 @@ final class Storage {
             do {
                 return try JSONDecoder().decode(DeepLinkResult.self, from: data)
             } catch {
-                Logger.warning("Failed to decode cached result: \(error)")
+                DynalinksLogger.warning("Failed to decode cached result: \(error)")
                 return nil
             }
         }
@@ -33,7 +33,7 @@ final class Storage {
                     let data = try JSONEncoder().encode(newValue)
                     defaults.set(data, forKey: resultKey)
                 } catch {
-                    Logger.warning("Failed to encode result for caching: \(error)")
+                    DynalinksLogger.warning("Failed to encode result for caching: \(error)")
                 }
             } else {
                 defaults.removeObject(forKey: resultKey)
@@ -45,6 +45,6 @@ final class Storage {
     func reset() {
         hasCheckedForDeferredDeepLink = false
         cachedResult = nil
-        Logger.debug("Storage reset")
+        DynalinksLogger.debug("Storage reset")
     }
 }

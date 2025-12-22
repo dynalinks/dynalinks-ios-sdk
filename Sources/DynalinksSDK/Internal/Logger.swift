@@ -1,5 +1,5 @@
 import Foundation
-import os.log
+import os
 
 /// Log level for Dynalinks SDK
 public enum DynalinksLogLevel: Int, Comparable {
@@ -20,58 +20,32 @@ public enum DynalinksLogLevel: Int, Comparable {
 }
 
 /// Internal logger for Dynalinks SDK
-final class Logger {
+enum DynalinksLogger {
     static var logLevel: DynalinksLogLevel = .error
 
-    private static let osLog = OSLog(subsystem: "com.dynalinks.sdk", category: "Dynalinks")
+    private static let logger = os.Logger(subsystem: "com.dynalinks.sdk", category: "Dynalinks")
 
     static func debug(_ message: @autoclosure () -> String) {
-        log(level: .debug, message: message())
+        guard .debug <= logLevel else { return }
+        let msg = message()
+        logger.debug("\(msg, privacy: .public)")
     }
 
     static func info(_ message: @autoclosure () -> String) {
-        log(level: .info, message: message())
+        guard .info <= logLevel else { return }
+        let msg = message()
+        logger.info("\(msg, privacy: .public)")
     }
 
     static func warning(_ message: @autoclosure () -> String) {
-        log(level: .warning, message: message())
+        guard .warning <= logLevel else { return }
+        let msg = message()
+        logger.warning("\(msg, privacy: .public)")
     }
 
     static func error(_ message: @autoclosure () -> String) {
-        log(level: .error, message: message())
-    }
-
-    private static func log(level: DynalinksLogLevel, message: String) {
-        guard level <= logLevel else { return }
-
-        let prefix: String
-        let osLogType: OSLogType
-
-        switch level {
-        case .none:
-            return
-        case .error:
-            prefix = "ERROR"
-            osLogType = .error
-        case .warning:
-            prefix = "WARN"
-            osLogType = .default
-        case .info:
-            prefix = "INFO"
-            osLogType = .info
-        case .debug:
-            prefix = "DEBUG"
-            osLogType = .debug
-        }
-
-        let formattedMessage = "[Dynalinks] [\(prefix)] \(message)"
-
-        // Use os_log for system integration
-        os_log("%{public}@", log: osLog, type: osLogType, formattedMessage)
-
-        // Also print to console for debugging
-        #if DEBUG
-        print(formattedMessage)
-        #endif
+        guard .error <= logLevel else { return }
+        let msg = message()
+        logger.error("\(msg, privacy: .public)")
     }
 }

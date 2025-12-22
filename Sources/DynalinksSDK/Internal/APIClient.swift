@@ -58,11 +58,11 @@ final class APIClient {
         do {
             request.httpBody = try JSONEncoder().encode(body)
         } catch {
-            Logger.error("Failed to encode fingerprint: \(error)")
+            DynalinksLogger.error("Failed to encode fingerprint: \(error)")
             throw DynalinksError.invalidResponse
         }
 
-        Logger.debug("Sending match request to \(url)")
+        DynalinksLogger.debug("Sending match request to \(url)")
 
         return try await performRequestWithRetry(request)
     }
@@ -82,11 +82,11 @@ final class APIClient {
         do {
             request.httpBody = try JSONEncoder().encode(body)
         } catch {
-            Logger.error("Failed to encode resolve request: \(error)")
+            DynalinksLogger.error("Failed to encode resolve request: \(error)")
             throw DynalinksError.invalidResponse
         }
 
-        Logger.debug("Sending resolve request to \(endpoint)")
+        DynalinksLogger.debug("Sending resolve request to \(endpoint)")
 
         return try await performRequestWithRetry(request)
     }
@@ -100,11 +100,11 @@ final class APIClient {
                 let (data, response) = try await session.data(for: request)
 
                 guard let httpResponse = response as? HTTPURLResponse else {
-                    Logger.error("Invalid response type")
+                    DynalinksLogger.error("Invalid response type")
                     throw DynalinksError.invalidResponse
                 }
 
-                Logger.debug("Response status: \(httpResponse.statusCode) (attempt \(attempt + 1))")
+                DynalinksLogger.debug("Response status: \(httpResponse.statusCode) (attempt \(attempt + 1))")
 
                 switch httpResponse.statusCode {
                 case 200...299:
@@ -122,12 +122,12 @@ final class APIClient {
 
                     if attempt < maxRetries {
                         let delay = baseRetryDelay * pow(2.0, Double(attempt))
-                        Logger.warning("Server error \(httpResponse.statusCode), retrying in \(delay)s (attempt \(attempt + 1)/\(maxRetries + 1))")
+                        DynalinksLogger.warning("Server error \(httpResponse.statusCode), retrying in \(delay)s (attempt \(attempt + 1)/\(maxRetries + 1))")
                         try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
                         continue
                     }
 
-                    Logger.error("Server error after \(maxRetries + 1) attempts: \(httpResponse.statusCode)")
+                    DynalinksLogger.error("Server error after \(maxRetries + 1) attempts: \(httpResponse.statusCode)")
                     throw error
 
                 default:
@@ -143,12 +143,12 @@ final class APIClient {
 
                 if attempt < maxRetries {
                     let delay = baseRetryDelay * pow(2.0, Double(attempt))
-                    Logger.warning("Network error, retrying in \(delay)s (attempt \(attempt + 1)/\(maxRetries + 1)): \(error.localizedDescription)")
+                    DynalinksLogger.warning("Network error, retrying in \(delay)s (attempt \(attempt + 1)/\(maxRetries + 1)): \(error.localizedDescription)")
                     try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
                     continue
                 }
 
-                Logger.error("Network request failed after \(maxRetries + 1) attempts: \(error)")
+                DynalinksLogger.error("Network request failed after \(maxRetries + 1) attempts: \(error)")
                 throw DynalinksError.networkError(underlying: error)
             }
         }
@@ -161,14 +161,14 @@ final class APIClient {
     private func handleClientError(_ statusCode: Int, data: Data) throws -> DeepLinkResult {
         switch statusCode {
         case 401:
-            Logger.error("Unauthorized - check client API key")
+            DynalinksLogger.error("Unauthorized - check client API key")
             throw DynalinksError.serverError(statusCode: 401, message: "Invalid client API key")
         case 429:
-            Logger.warning("Rate limited")
+            DynalinksLogger.warning("Rate limited")
             throw DynalinksError.serverError(statusCode: 429, message: "Rate limit exceeded")
         default:
             let message = try? decodeErrorMessage(data)
-            Logger.error("Client error: \(statusCode) - \(message ?? "unknown")")
+            DynalinksLogger.error("Client error: \(statusCode) - \(message ?? "unknown")")
             throw DynalinksError.serverError(statusCode: statusCode, message: message)
         }
     }
@@ -176,12 +176,12 @@ final class APIClient {
     private func decodeResponse(_ data: Data) throws -> DeepLinkResult {
         do {
             let result = try JSONDecoder().decode(DeepLinkResult.self, from: data)
-            Logger.debug("Decoded result: matched=\(result.matched)")
+            DynalinksLogger.debug("Decoded result: matched=\(result.matched)")
             return result
         } catch {
-            Logger.error("Failed to decode response: \(error)")
+            DynalinksLogger.error("Failed to decode response: \(error)")
             if let responseString = String(data: data, encoding: .utf8) {
-                Logger.debug("Response body: \(responseString)")
+                DynalinksLogger.debug("Response body: \(responseString)")
             }
             throw DynalinksError.invalidResponse
         }
