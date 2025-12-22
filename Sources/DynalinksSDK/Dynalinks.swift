@@ -165,6 +165,62 @@ public final class Dynalinks: @unchecked Sendable {
         }
     }
 
+    /// Handle a Universal Link that opened the app
+    ///
+    /// Call this when your app receives a Universal Link. The SDK will:
+    /// 1. Resolve the link and return its data
+    /// 2. Record the click for analytics
+    /// 3. Skip any subsequent deferred deep link check
+    ///
+    /// Example usage in SceneDelegate:
+    /// ```swift
+    /// func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+    ///     guard let url = userActivity.webpageURL else { return }
+    ///     Task {
+    ///         let result = try await Dynalinks.handleUniversalLink(url: url)
+    ///         if result.matched, let link = result.link {
+    ///             // Navigate to link.deepLinkValue
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// - Parameter url: The Universal Link URL that opened the app
+    /// - Returns: A `DeepLinkResult` with the resolved link data
+    /// - Throws: `DynalinksError` if the SDK is not configured or the request fails
+    public static func handleUniversalLink(url: URL) async throws -> DeepLinkResult {
+        guard let sdk = shared else {
+            Logger.error("SDK not configured")
+            throw DynalinksError.notConfigured
+        }
+        return try await sdk.resolveUniversalLink(url: url)
+    }
+
+    /// Handle a Universal Link with completion handler
+    ///
+    /// Convenience method for non-async contexts.
+    ///
+    /// - Parameters:
+    ///   - url: The Universal Link URL that opened the app
+    ///   - completion: Callback with the result or error
+    public static func handleUniversalLink(
+        url: URL,
+        completion: @escaping (Result<DeepLinkResult, Error>) -> Void
+    ) {
+        Task {
+            do {
+                let result = try await handleUniversalLink(url: url)
+                await MainActor.run {
+                    completion(.success(result))
+                }
+            } catch {
+                await MainActor.run {
+                    completion(.failure(error))
+                }
+            }
+        }
+    }
+
     /// Reset the SDK state
     ///
     /// This clears the cached result and allows `checkForDeferredDeepLink`
@@ -222,6 +278,26 @@ public final class Dynalinks: @unchecked Sendable {
             Logger.info("Match found: confidence=\(confidence), score=\(result.matchScore ?? 0)")
         } else {
             Logger.info("No match found")
+        }
+
+        return result
+    }
+
+    private func resolveUniversalLink(url: URL) async throws -> DeepLinkResult {
+        Logger.debug("Resolving Universal Link: \(url)")
+
+        // Mark as checked to skip deferred deep link check
+        storage.hasCheckedForDeferredDeepLink = true
+
+        // Make API request to attribute the link
+        let result = try await apiClient.attributeLink(url: url)
+
+        // Cache successful match
+        if result.matched {
+            storage.cachedResult = result
+            Logger.info("Universal Link resolved: \(result.link?.path ?? "unknown")")
+        } else {
+            Logger.info("Universal Link not matched")
         }
 
         return result

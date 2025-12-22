@@ -3,12 +3,10 @@ import DynalinksSDK
 
 @main
 struct DynalinksExampleApp: App {
+    @State private var deepLinkResult: DeepLinkResult?
+    @State private var error: Error?
+
     init() {
-        // Configure SDK with your client API key
-        // Get this from your Dynalinks console (must be a valid UUID)
-        //
-        // To override, set DYNALINKS_API_KEY environment variable in Xcode:
-        // Edit Scheme → Run → Arguments → Environment Variables
         let apiKey = ProcessInfo.processInfo.environment["DYNALINKS_API_KEY"] ?? "00000000-0000-0000-0000-000000000000"
         let baseURLString = ProcessInfo.processInfo.environment["DYNALINKS_BASE_URL"] ?? "https://dynalinks.app/api/v1"
 
@@ -17,7 +15,7 @@ struct DynalinksExampleApp: App {
                 clientAPIKey: apiKey,
                 baseURL: URL(string: baseURLString)!,
                 logLevel: .debug,
-                allowSimulator: true  // Enable for testing on simulator
+                allowSimulator: true
             )
         } catch {
             print("Failed to configure Dynalinks SDK: \(error)")
@@ -26,7 +24,25 @@ struct DynalinksExampleApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(result: deepLinkResult, error: error)
+                .onOpenURL { url in
+                    Task {
+                        do {
+                            deepLinkResult = try await Dynalinks.handleUniversalLink(url: url)
+                            error = nil
+                        } catch {
+                            self.error = error
+                        }
+                    }
+                }
+                .task {
+                    // Check for deferred deep link on first launch
+                    do {
+                        deepLinkResult = try await Dynalinks.checkForDeferredDeepLink()
+                    } catch {
+                        self.error = error
+                    }
+                }
         }
     }
 }

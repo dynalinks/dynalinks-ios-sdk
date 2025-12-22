@@ -136,6 +136,90 @@ Dynalinks.checkForDeferredDeepLink { result in
 }
 ```
 
+### 3. Handle Universal Links
+
+When your app is opened via a Universal Link (user already has the app installed), use `handleUniversalLink` to resolve the link and get the full link data:
+
+**SwiftUI (with `onOpenURL`):**
+
+```swift
+@main
+struct MyApp: App {
+    init() {
+        do {
+            try Dynalinks.configure(clientAPIKey: "your-client-api-key")
+        } catch {
+            print("Failed to configure: \(error)")
+        }
+    }
+
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .onOpenURL { url in
+                    Task {
+                        await handleUniversalLink(url)
+                    }
+                }
+        }
+    }
+
+    private func handleUniversalLink(_ url: URL) async {
+        do {
+            let result = try await Dynalinks.handleUniversalLink(url: url)
+            if result.matched, let link = result.link {
+                // Navigate to the deep link destination
+                print("Deep link: \(link.deepLinkValue ?? "")")
+            }
+        } catch {
+            print("Failed to resolve link: \(error)")
+        }
+    }
+}
+```
+
+**UIKit (SceneDelegate):**
+
+```swift
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        guard let url = userActivity.webpageURL else { return }
+
+        Task {
+            do {
+                let result = try await Dynalinks.handleUniversalLink(url: url)
+                if result.matched, let link = result.link {
+                    // Navigate to destination
+                }
+            } catch {
+                print("Error: \(error)")
+            }
+        }
+    }
+}
+```
+
+**Completion Handler:**
+
+```swift
+Dynalinks.handleUniversalLink(url: url) { result in
+    switch result {
+    case .success(let deepLink):
+        if deepLink.matched, let link = deepLink.link {
+            handleDeepLink(link)
+        }
+    case .failure(let error):
+        print("Error: \(error)")
+    }
+}
+```
+
+> **Note:** When `handleUniversalLink` is called, the SDK automatically skips any subsequent deferred deep link check since the user already has a direct link.
+
+### Universal Links Setup
+
+For Universal Links to work, you need to configure Associated Domains in your app. See the [iOS Integration Guide](https://docs.dynalinks.app/integrations/ios.html) for setup instructions.
+
 ## Configuration Options
 
 ```swift
@@ -162,12 +246,27 @@ try Dynalinks.configure(
 
 ## How It Works
 
+### Universal Links (App Already Installed)
+
+When a user clicks a Dynalinks link and your app is already installed:
+
+1. **User clicks a Dynalinks link** → iOS opens your app directly
+2. **App receives URL via `onOpenURL` or SceneDelegate**
+3. **App calls `handleUniversalLink(url:)`** → SDK resolves link data
+4. **App navigates to deep link destination**
+
+### Deferred Deep Links (App Not Yet Installed)
+
+When a user clicks a Dynalinks link but needs to install your app first:
+
 1. **User clicks a Dynalinks link** → Opens web preview page
 2. **Web page collects fingerprint** → Screen size, OS version, timezone, etc.
 3. **User installs app from App Store**
 4. **App calls `checkForDeferredDeepLink()`** → SDK collects device fingerprint
 5. **Server matches fingerprints** → Returns the original link if matched
 6. **App navigates to deep link destination**
+
+> **Note:** If `handleUniversalLink` is called first, subsequent calls to `checkForDeferredDeepLink` will skip the server request since the user already has a direct link.
 
 ## DeepLinkResult
 

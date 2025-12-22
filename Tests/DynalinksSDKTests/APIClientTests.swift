@@ -439,6 +439,128 @@ final class APIClientTests: XCTestCase {
         XCTAssertEqual(queryItems.first(where: { $0.name == "campaign" })?.value, "summer")
         XCTAssertEqual(queryItems.first(where: { $0.name == "promo" })?.value, "SAVE20")
     }
+
+    // MARK: - Attribute Link Tests
+
+    func testAttributeLink_SetsCorrectHeaders() async throws {
+        var capturedRequest: URLRequest?
+
+        MockURLProtocol.requestHandler = { request in
+            capturedRequest = request
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            return (response, "{\"matched\": false}".data(using: .utf8)!)
+        }
+
+        let url = URL(string: "https://app.dynalinks.app/product/shoes")!
+        _ = try await apiClient.attributeLink(url: url)
+
+        XCTAssertNotNil(capturedRequest)
+        XCTAssertEqual(capturedRequest?.httpMethod, "POST")
+        XCTAssertEqual(capturedRequest?.value(forHTTPHeaderField: "Authorization"), "Bearer test-api-key")
+        XCTAssertEqual(capturedRequest?.value(forHTTPHeaderField: "Content-Type"), "application/json")
+        XCTAssertTrue(capturedRequest?.value(forHTTPHeaderField: "User-Agent")?.contains("DynalinksSDK") ?? false)
+    }
+
+    func testAttributeLink_SendsURLAndPlatformInBody() async throws {
+        var capturedBody: Data?
+
+        MockURLProtocol.requestHandler = { request in
+            capturedBody = request.bodyData
+
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            return (response, "{\"matched\": false}".data(using: .utf8)!)
+        }
+
+        let url = URL(string: "https://app.dynalinks.app/product/shoes?ref=email")!
+        _ = try await apiClient.attributeLink(url: url)
+
+        XCTAssertNotNil(capturedBody, "Request body should not be nil")
+
+        if let body = capturedBody, let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any] {
+            XCTAssertEqual(json["url"] as? String, "https://app.dynalinks.app/product/shoes?ref=email")
+            XCTAssertEqual(json["platform"] as? String, "ios")
+        } else {
+            XCTFail("Failed to parse request body as JSON")
+        }
+    }
+
+    func testAttributeLink_ReturnsMatchedLink() async throws {
+        let json = """
+        {
+            "matched": true,
+            "link": {
+                "id": "resolved-123",
+                "name": "Resolved Link",
+                "path": "/product/shoes",
+                "deep_link_value": "/product/shoes"
+            }
+        }
+        """
+        MockURLProtocol.mockSuccess(json: json)
+
+        let url = URL(string: "https://app.dynalinks.app/product/shoes")!
+        let result = try await apiClient.attributeLink(url: url)
+
+        XCTAssertTrue(result.matched)
+        XCTAssertEqual(result.link?.id, "resolved-123")
+        XCTAssertEqual(result.link?.deepLinkValue, "/product/shoes")
+    }
+
+    func testAttributeLink_ReturnsNoMatch() async throws {
+        MockURLProtocol.mockSuccess(json: "{\"matched\": false}")
+
+        let url = URL(string: "https://app.dynalinks.app/unknown/path")!
+        let result = try await apiClient.attributeLink(url: url)
+
+        XCTAssertFalse(result.matched)
+        XCTAssertNil(result.link)
+    }
+
+    func testAttributeLink_HandlesUnauthorized() async throws {
+        MockURLProtocol.mockError(statusCode: 401, message: "Invalid client API key")
+
+        let url = URL(string: "https://app.dynalinks.app/product/shoes")!
+
+        do {
+            _ = try await apiClient.attributeLink(url: url)
+            XCTFail("Expected error to be thrown")
+        } catch let error as DynalinksError {
+            if case .serverError(let statusCode, let message) = error {
+                XCTAssertEqual(statusCode, 401)
+                XCTAssertEqual(message, "Invalid client API key")
+            } else {
+                XCTFail("Expected serverError, got \(error)")
+            }
+        }
+    }
+
+    func testAttributeLink_HandlesRateLimited() async throws {
+        MockURLProtocol.mockError(statusCode: 429, message: "Rate limit exceeded")
+
+        let url = URL(string: "https://app.dynalinks.app/product/shoes")!
+
+        do {
+            _ = try await apiClient.attributeLink(url: url)
+            XCTFail("Expected error to be thrown")
+        } catch let error as DynalinksError {
+            if case .serverError(let statusCode, let message) = error {
+                XCTAssertEqual(statusCode, 429)
+                XCTAssertEqual(message, "Rate limit exceeded")
+            } else {
+                XCTFail("Expected serverError, got \(error)")
+            }
+        }
+    }
 }
 
 // MARK: - Mock Fingerprint

@@ -67,6 +67,30 @@ final class APIClient {
         return try await performRequestWithRetry(request)
     }
 
+    /// Attribute a Universal Link URL to get link data
+    func attributeLink(url: URL) async throws -> DeepLinkResult {
+        let endpoint = baseURL.appendingPathComponent("links/attribute")
+
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(clientAPIKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("DynalinksSDK-iOS/\(Dynalinks.version)", forHTTPHeaderField: "User-Agent")
+
+        let body = ResolveLinkRequest(url: url.absoluteString, platform: "ios")
+
+        do {
+            request.httpBody = try JSONEncoder().encode(body)
+        } catch {
+            Logger.error("Failed to encode resolve request: \(error)")
+            throw DynalinksError.invalidResponse
+        }
+
+        Logger.debug("Sending resolve request to \(endpoint)")
+
+        return try await performRequestWithRetry(request)
+    }
+
     /// Performs HTTP request with exponential backoff retry for transient failures
     private func performRequestWithRetry(_ request: URLRequest) async throws -> DeepLinkResult {
         var lastError: Error?
@@ -178,4 +202,9 @@ final class APIClient {
 
 private struct FingerprintRequest: Encodable {
     let fingerprint: DeviceFingerprint
+}
+
+private struct ResolveLinkRequest: Encodable {
+    let url: String
+    let platform: String
 }
