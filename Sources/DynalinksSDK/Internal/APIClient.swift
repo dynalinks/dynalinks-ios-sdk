@@ -53,7 +53,7 @@ final class APIClient {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("DynalinksSDK-iOS/\(Dynalinks.version)", forHTTPHeaderField: "User-Agent")
 
-        let body = FingerprintRequest(fingerprint: fingerprint)
+        let body = FingerprintRequest(fingerprint: fingerprint, platform: "ios")
 
         do {
             request.httpBody = try JSONEncoder().encode(body)
@@ -202,6 +202,7 @@ final class APIClient {
 
 private struct FingerprintRequest: Encodable {
     let fingerprint: DeviceFingerprint
+    let platform: String
 }
 
 private struct ResolveLinkRequest: Encodable {
