@@ -35,7 +35,7 @@ struct DeviceFingerprint: Encodable {
     /// Collect device fingerprint data
     static func collect() -> DeviceFingerprint {
         let screen = UIScreen.main
-        let bounds = screen.nativeBounds
+        let bounds = screen.bounds  // Use logical pixels to match web's screen.width/height
         let device = UIDevice.current
         let locale = Locale.current
         let bundle = Bundle.main
