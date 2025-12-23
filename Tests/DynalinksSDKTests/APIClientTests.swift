@@ -573,6 +573,7 @@ extension DeviceFingerprint {
             devicePixelRatio: 3.0,
             osVersion: "17.0",
             timezone: "America/New_York",
+            calendar: "gregory",
             language: "en-US",
             languages: ["en-US", "en"],
             countryCode: "US",
