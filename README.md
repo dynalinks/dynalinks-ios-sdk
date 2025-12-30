@@ -10,6 +10,20 @@ Swift SDK for Dynalinks deferred deep linking.
 
 ## Installation
 
+### CocoaPods
+
+Add the following to your `Podfile`:
+
+```ruby
+pod 'DynalinksSDK', '~> 1.0'
+```
+
+Then run:
+
+```bash
+pod install
+```
+
 ### Swift Package Manager
 
 Add the following to your `Package.swift`:
@@ -22,7 +36,7 @@ dependencies: [
 
 Or in Xcode:
 1. Go to **File > Add Package Dependencies**
-2. Enter the repository URL
+2. Enter the repository URL: `https://github.com/dynalinks/dynalinks-ios-sdk`
 3. Select the version and add to your target
 
 ## Quick Start
