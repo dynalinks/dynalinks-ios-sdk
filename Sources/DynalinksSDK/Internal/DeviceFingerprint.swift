@@ -99,18 +99,6 @@ struct DeviceFingerprint: Encodable {
         case .persian: return "persian"
         case .republicOfChina: return "roc"
         case .iso8601: return "iso8601"
-        // Regional calendar variants - map to base calendar type
-        case .bangla: return "gregory"  // Bengali calendar variant
-        case .gujarati: return "gregory"
-        case .kannada: return "gregory"
-        case .malayalam: return "gregory"
-        case .marathi: return "gregory"
-        case .odia: return "gregory"
-        case .tamil: return "gregory"
-        case .telugu: return "gregory"
-        case .vikram: return "gregory"  // Vikram Samvat
-        case .dangi: return "dangi"  // Korean lunisolar
-        case .vietnamese: return "gregory"
         @unknown default: return "gregory"
         }
     }
