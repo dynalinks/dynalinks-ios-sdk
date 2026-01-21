@@ -308,6 +308,12 @@ public struct LinkData {
     public let fullURL: URL?                     // Full Dynalinks URL
     public let deepLinkValue: String?            // Deep link value for routing
     public let iosDeferredDeepLinkingEnabled: Bool?
+
+    // Attribution fields
+    public let referrer: String?                 // Referrer tracking parameter
+    public let providerToken: String?            // Apple Search Ads token (pt)
+    public let campaignToken: String?            // Campaign identifier (ct)
+
     // ... additional fields for social sharing, fallback URLs, etc.
 }
 ```
@@ -340,6 +346,36 @@ public enum DynalinksError: Error {
 2. **Handle gracefully**: The SDK caches results - subsequent calls return cached data
 3. **Don't block UI**: Use async/await or completion handlers
 4. **Test on device**: Deferred deep linking is disabled on simulator by default
+
+## Attribution Tracking
+
+The SDK provides attribution data for campaign tracking and analytics:
+
+```swift
+let result = try await Dynalinks.checkForDeferredDeepLink()
+if result.matched, let link = result.link {
+    // Track attribution data for analytics
+    if let referrer = link.referrer {
+        print("Referrer: \(referrer)")  // e.g., "utm_source=facebook&utm_campaign=summer"
+    }
+
+    if let providerToken = link.providerToken {
+        print("Apple Search Ads token: \(providerToken)")  // pt parameter
+    }
+
+    if let campaignToken = link.campaignToken {
+        print("Campaign: \(campaignToken)")  // ct parameter
+    }
+
+    // Send to your analytics platform
+    Analytics.track("deep_link_opened", properties: [
+        "referrer": link.referrer,
+        "provider_token": link.providerToken,
+        "campaign": link.campaignToken,
+        "deep_link": link.deepLinkValue
+    ])
+}
+```
 
 ## Privacy
 

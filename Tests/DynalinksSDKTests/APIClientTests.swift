@@ -387,7 +387,10 @@ final class APIClientTests: XCTestCase {
                 "social_title": "Check this out!",
                 "social_description": "Amazing product",
                 "social_image_url": "https://example.com/image.png",
-                "clicks": 42
+                "clicks": 42,
+                "referrer": "utm_source=facebook&utm_campaign=summer",
+                "provider_token": "12345678",
+                "campaign_token": "summer_sale"
             }
         }
         """
@@ -412,6 +415,9 @@ final class APIClientTests: XCTestCase {
         XCTAssertEqual(link.socialDescription, "Amazing product")
         XCTAssertEqual(link.socialImageURL, URL(string: "https://example.com/image.png"))
         XCTAssertEqual(link.clicks, 42)
+        XCTAssertEqual(link.referrer, "utm_source=facebook&utm_campaign=summer")
+        XCTAssertEqual(link.providerToken, "12345678")
+        XCTAssertEqual(link.campaignToken, "summer_sale")
     }
 
     func testMatchFingerprint_ParsesURLWithQueryParams() async throws {

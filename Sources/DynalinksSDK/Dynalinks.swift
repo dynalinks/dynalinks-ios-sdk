@@ -32,7 +32,7 @@ public final class Dynalinks: @unchecked Sendable {
     // MARK: - Version
 
     /// The current version of the Dynalinks SDK
-    public static let version = "1.0.2"
+    public static let version = "1.0.3"
 
     // MARK: - Singleton
 

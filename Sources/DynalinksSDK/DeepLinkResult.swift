@@ -74,6 +74,15 @@ public struct DeepLinkResult: Codable, Equatable {
         /// Number of clicks
         public let clicks: Int?
 
+        /// Referrer tracking parameter (e.g., "utm_source=facebook")
+        public let referrer: String?
+
+        /// Apple Search Ads attribution token (pt parameter)
+        public let providerToken: String?
+
+        /// Campaign identifier for attribution (ct parameter)
+        public let campaignToken: String?
+
         // swiftlint:disable:next nesting
         enum CodingKeys: String, CodingKey {
             case id
@@ -91,6 +100,9 @@ public struct DeepLinkResult: Codable, Equatable {
             case socialDescription = "social_description"
             case socialImageURL = "social_image_url"
             case clicks
+            case referrer
+            case providerToken = "provider_token"
+            case campaignToken = "campaign_token"
         }
 
         /// Initialize link data
@@ -109,7 +121,10 @@ public struct DeepLinkResult: Codable, Equatable {
             socialTitle: String? = nil,
             socialDescription: String? = nil,
             socialImageURL: URL? = nil,
-            clicks: Int? = nil
+            clicks: Int? = nil,
+            referrer: String? = nil,
+            providerToken: String? = nil,
+            campaignToken: String? = nil
         ) {
             self.id = id
             self.name = name
@@ -126,6 +141,9 @@ public struct DeepLinkResult: Codable, Equatable {
             self.socialDescription = socialDescription
             self.socialImageURL = socialImageURL
             self.clicks = clicks
+            self.referrer = referrer
+            self.providerToken = providerToken
+            self.campaignToken = campaignToken
         }
 
         public init(from decoder: Decoder) throws {
@@ -150,6 +168,9 @@ public struct DeepLinkResult: Codable, Equatable {
             socialImageURL = Self.decodeURL(from: container, forKey: .socialImageURL)
             socialTitle = try container.decodeIfPresent(String.self, forKey: .socialTitle)
             socialDescription = try container.decodeIfPresent(String.self, forKey: .socialDescription)
+            referrer = try container.decodeIfPresent(String.self, forKey: .referrer)
+            providerToken = try container.decodeIfPresent(String.self, forKey: .providerToken)
+            campaignToken = try container.decodeIfPresent(String.self, forKey: .campaignToken)
         }
 
         private static func decodeURL(
@@ -180,6 +201,9 @@ public struct DeepLinkResult: Codable, Equatable {
             try container.encodeIfPresent(socialDescription, forKey: .socialDescription)
             try container.encodeIfPresent(socialImageURL?.absoluteString, forKey: .socialImageURL)
             try container.encodeIfPresent(clicks, forKey: .clicks)
+            try container.encodeIfPresent(referrer, forKey: .referrer)
+            try container.encodeIfPresent(providerToken, forKey: .providerToken)
+            try container.encodeIfPresent(campaignToken, forKey: .campaignToken)
         }
     }
 
