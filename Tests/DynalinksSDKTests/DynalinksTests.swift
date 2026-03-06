@@ -499,21 +499,14 @@ final class DynalinksTests: XCTestCase {
         )
         XCTAssertTrue(ulResult.matched)
 
-        // Change mock to return different result
-        MockURLProtocol.mockSuccess(json: """
-        {
-            "matched": true,
-            "link": {"id": "different-123"}
-        }
-        """)
-
-        // Deferred check should return cached result from Universal Link
+        // Deferred check should return no-match — universal link results
+        // must not be replayed as deferred deep link matches
         let deferredResult = try await Dynalinks.checkForDeferredDeepLink()
-        XCTAssertTrue(deferredResult.matched)
-        XCTAssertEqual(deferredResult.link?.id, "ul-123") // Cached from UL, not new API call
+        XCTAssertFalse(deferredResult.matched)
+        XCTAssertNil(deferredResult.link)
     }
 
-    func testHandleUniversalLink_CachesResult() async throws {
+    func testHandleUniversalLink_DoesNotCacheResult() async throws {
         MockURLProtocol.mockSuccess(json: """
         {
             "matched": true,
@@ -534,9 +527,9 @@ final class DynalinksTests: XCTestCase {
             url: URL(string: "https://project.dynalinks.app/cached")!
         )
 
+        // Should mark as checked but NOT cache the result
         XCTAssertTrue(mockStorage.hasCheckedForDeferredDeepLink)
-        XCTAssertNotNil(mockStorage.cachedResult)
-        XCTAssertEqual(mockStorage.cachedResult?.link?.id, "cached-ul-123")
+        XCTAssertNil(mockStorage.cachedResult)
     }
 
     func testHandleUniversalLink_CompletionHandler_Success() {

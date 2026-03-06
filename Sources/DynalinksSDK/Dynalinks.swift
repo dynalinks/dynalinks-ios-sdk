@@ -286,15 +286,15 @@ public final class Dynalinks: @unchecked Sendable {
     private func resolveUniversalLink(url: URL) async throws -> DeepLinkResult {
         DynalinksLogger.debug("Resolving Universal Link: \(url)")
 
-        // Mark as checked to skip deferred deep link check
+        // Mark as checked to skip deferred deep link check.
+        // Do NOT cache the result — universal link results must not be
+        // replayed as deferred deep link matches on subsequent launches.
         storage.hasCheckedForDeferredDeepLink = true
 
         // Make API request to attribute the link
         let result = try await apiClient.attributeLink(url: url)
 
-        // Cache successful match
         if result.matched {
-            storage.cachedResult = result
             DynalinksLogger.info("Universal Link resolved: \(result.link?.path ?? "unknown")")
         } else {
             DynalinksLogger.info("Universal Link not matched")
